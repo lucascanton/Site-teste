@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Factor 150 - Planejamento Financeiro 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 100%; height: 300px; margin: 0 auto; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .kpi-value { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+    </style>
+    <!-- Chosen Palette: Emerald & Slate -->
+    <!-- Application Structure Plan: Dashboard modularizado. A estrutura foi expandida para incluir uma aba específica de custos da moto, separando o parcelamento dos custos operacionais. O fluxo de dados agora separa rigidamente Custo Fixo Pessoal, Variável Pessoal e os custos específicos da Moto. -->
+    <!-- Visualization & Content Choices: 
+         1. Dashboard de KPIs: Visão rápida de saldo e parcelas.
+         2. Gráfico de Barras Empilhadas: Para mostrar a composição do gasto mensal (Pessoal vs Moto).
+         3. Tabela Detalhada: Com colunas separadas para cada categoria de custo solicitada.
+         NO SVG used. NO Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased selection:bg-emerald-200">
+
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-2xl shadow-lg">🏍️</div>
+                <div>
+                    <h1 class="text-xl font-black text-slate-800 tracking-tight text-emerald-600">FACTOR 150 - GESTÃO 2026</h1>
+                    <p class="text-xs font-bold text-slate-500 uppercase">Barbacena: Salário + iFood + Parcelamento</p>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-4">
+                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Meta: Compra em Maio</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- Top KPIs -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="card p-6 border-l-4 border-emerald-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4">Simulador iFood</h3>
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-700">Operar FDS</span>
+                    <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="ifoodToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 left-0 transition-all duration-300" checked/>
+                        <label for="ifoodToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <span class="text-slate-400 text-xs font-bold uppercase">Parcela Moto (XP)</span>
+                <div class="mt-2"><span class="text-2xl font-black text-slate-800 kpi-value">R$ 590,00</span></div>
+                <span class="text-[10px] text-slate-500">Fixo de Maio a Dezembro</span>
+            </div>
+
+            <div class="card p-6">
+                <span class="text-slate-400 text-xs font-bold uppercase">Média Sobra iFood</span>
+                <div class="mt-2"><span class="text-2xl font-black text-emerald-600 kpi-value" id="kpiIfood">R$ 660,00</span></div>
+                <span class="text-[10px] text-slate-500">Líquido após combustível/óleo</span>
+            </div>
+
+            <div class="card p-6 bg-slate-800 text-white">
+                <span class="text-slate-400 text-xs font-bold uppercase">Saldo Final Ano (Est.)</span>
+                <div class="mt-2"><span class="text-2xl font-black text-emerald-400 kpi-value" id="kpiFinal">R$ 0,00</span></div>
+                <span class="text-[10px] text-slate-300">Reserva acumulada em Dezembro</span>
+            </div>
+        </section>
+
+        <!-- Main Visuals -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Evolution Chart -->
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Composição de Gastos vs Receita</h3>
+                    <div class="chart-container">
+                        <canvas id="mainFinanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Costs Column -->
+            <div class="space-y-6">
+                <div class="card p-6 border-t-4 border-blue-500">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span>📋</span> Resumo Mensal (Pós-Maio)
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Salário CLT (Líquido)</span>
+                            <span class="font-bold text-slate-700">R$ 1.622,00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Custos Fixos Pessoais</span>
+                            <span class="font-bold text-red-500">- R$ 603,37</span>
+                        </div>
+                        <div class="flex justify-between text-sm border-b pb-2">
+                            <span class="text-slate-500">Margem de Segurança</span>
+                            <span class="font-bold text-orange-500">- R$ 150,00</span>
+                        </div>
+                        <div class="flex justify-between text-sm pt-2">
+                            <span class="text-slate-800 font-bold italic underline">Custos da Moto:</span>
+                        </div>
+                        <div class="flex justify-between text-sm pl-2">
+                            <span class="text-slate-500">Parcela Cartão XP</span>
+                            <span class="font-bold text-red-600">- R$ 590,00</span>
+                        </div>
+                        <div class="flex justify-between text-sm pl-2">
+                            <span class="text-slate-500">Manutenção/Operação</span>
+                            <span class="font-bold text-red-600">- R$ 120,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 bg-emerald-900 text-white">
+                    <h4 class="font-bold text-emerald-400 text-sm mb-2 tracking-widest uppercase">Efeito iFood</h4>
+                    <p class="text-xs text-emerald-100 leading-relaxed">
+                        A operação de iFood em Barbacena (FDS) é o que garante que o parcelamento da moto não consuma sua reserva de emergência. 
+                        Com ele, a parcela de R$ 590 é "paga" pelo trabalho extra, sobrando ainda R$ 70 de lucro real.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <section class="card overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Planilha de Fluxo de Caixa 2026</h3>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Detalhamento por Categoria</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-500 uppercase">
+                        <tr>
+                            <th class="px-4 py-4">Mês</th>
+                            <th class="px-4 py-4 text-right">Salário</th>
+                            <th class="px-4 py-4 text-right">Fixo Pessoal</th>
+                            <th class="px-4 py-4 text-right">Var. Pessoal</th>
+                            <th class="px-4 py-4 text-right bg-blue-50/50">Parcela Moto</th>
+                            <th class="px-4 py-4 text-right bg-blue-50/50">Custo Moto</th>
+                            <th class="px-4 py-4 text-right text-emerald-600 font-bold">iFood (+)</th>
+                            <th class="px-4 py-4 text-right font-black">Sobra Final</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="tableBody">
+                        <!-- JS Render -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const months = ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        
+        // Data Structure based on user request:
+        // Salário | Fixo Pessoal | Var Pessoal | Parcela Moto | Custo Moto | iFood
+        const rawData = [
+            { m: 'Mar', sal: 1622, fixP: 1612, varP: 0, parcM: 0, costM: 0, ifood: 0 },
+            { m: 'Abr', sal: 1622, fixP: 1061, varP: 150, parcM: 0, costM: 0, ifood: 0 },
+            { m: 'Mai', sal: 1622, fixP: 816, varP: 150, parcM: 590, costM: 0, ifood: 0 },
+            { m: 'Jun', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 120, ifood: 660 },
+            { m: 'Jul', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 50, ifood: 660 },
+            { m: 'Ago', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 50, ifood: 660 },
+            { m: 'Set', sal: 1622, fixP: 641, varP: 150, parcM: 590, costM: 50, ifood: 660 },
+            { m: 'Out', sal: 1622, fixP: 641, varP: 150, parcM: 590, costM: 250, ifood: 660 },
+            { m: 'Nov', sal: 1622, fixP: 603, varP: 150, parcM: 590, costM: 50, ifood: 660 },
+            { m: 'Dez', sal: 1622, fixP: 603, varP: 150, parcM: 590, costM: 50, ifood: 660 }
+        ];
+
+        const toggle = document.getElementById('ifoodToggle');
+        const kpiIfood = document.getElementById('kpiIfood');
+        const kpiFinal = document.getElementById('kpiFinal');
+        const tableBody = document.getElementById('tableBody');
+        let chart = null;
+
+        function formatBRL(v) {
+            return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function update() {
+            const isIfood = toggle.checked;
+            let totalAccumulated = 0;
+            
+            const processed = rawData.map(d => {
+                const currentIfood = isIfood ? d.ifood : 0;
+                const sobra = d.sal - d.fixP - d.varP - d.parcM - d.costM + currentIfood;
+                totalAccumulated += sobra;
+                return { ...d, currentIfood, sobra };
+            });
+
+            // Update KPIs
+            kpiIfood.innerText = isIfood ? "R$ 660,00" : "R$ 0,00";
+            kpiFinal.innerText = formatBRL(totalAccumulated);
+
+            // Update Table
+            tableBody.innerHTML = processed.map(d => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 font-bold text-slate-700">${d.m}</td>
+                    <td class="px-4 py-3 text-right text-slate-600">${formatBRL(d.sal)}</td>
+                    <td class="px-4 py-3 text-right text-red-400">${formatBRL(d.fixP)}</td>
+                    <td class="px-4 py-3 text-right text-orange-400">${formatBRL(d.varP)}</td>
+                    <td class="px-4 py-3 text-right bg-blue-50/30 text-red-600 font-medium">${formatBRL(d.parcM)}</td>
+                    <td class="px-4 py-3 text-right bg-blue-50/30 text-red-600">${formatBRL(d.costM)}</td>
+                    <td class="px-4 py-3 text-right font-bold text-emerald-600">${formatBRL(d.currentIfood)}</td>
+                    <td class="px-4 py-3 text-right font-black ${d.sobra < 0 ? 'text-red-600' : 'text-slate-900'}">${formatBRL(d.sobra)}</td>
+                </tr>
+            `).join('');
+
+            renderChart(processed);
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('mainFinanceChart').getContext('2d');
+            
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Gasto Pessoal',
+                            data: data.map(d => d.fixP + d.varP),
+                            backgroundColor: '#94a3b8'
+                        },
+                        {
+                            label: 'Gasto Moto (Parcela + Custo)',
+                            data: data.map(d => d.parcM + d.costM),
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Sobra Líquida',
+                            data: data.map(d => d.sobra),
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => items[0].label,
+                                label: (item) => `${item.dataset.label}: ${formatBRL(item.raw)}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        toggle.addEventListener('change', update);
+        update();
+    </script>
+</body>
+</html>
