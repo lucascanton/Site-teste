@@ -3,270 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Factor 150 - Planejamento Financeiro 2026</title>
+    <title>Projeto Factor 150 - Planejamento Financeiro 2026-2027</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .chart-container { position: relative; width: 100%; max-width: 100%; height: 300px; margin: 0 auto; }
-        @media (min-width: 768px) { .chart-container { height: 350px; } }
-        .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; height: 280px; }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
         .kpi-value { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .progress-bar { transition: width 1s ease-in-out; }
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
-    <!-- Chosen Palette: Emerald & Slate -->
-    <!-- Application Structure Plan: Dashboard modularizado. A estrutura foi expandida para incluir uma aba específica de custos da moto, separando o parcelamento dos custos operacionais. O fluxo de dados agora separa rigidamente Custo Fixo Pessoal, Variável Pessoal e os custos específicos da Moto. -->
-    <!-- Visualization & Content Choices: 
-         1. Dashboard de KPIs: Visão rápida de saldo e parcelas.
-         2. Gráfico de Barras Empilhadas: Para mostrar a composição do gasto mensal (Pessoal vs Moto).
-         3. Tabela Detalhada: Com colunas separadas para cada categoria de custo solicitada.
-         NO SVG used. NO Mermaid used. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
-<body class="antialiased selection:bg-emerald-200">
+<body class="antialiased selection:bg-emerald-200 pb-12">
 
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-2xl shadow-lg">🏍️</div>
+                <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-200">🏍️</div>
                 <div>
-                    <h1 class="text-xl font-black text-slate-800 tracking-tight text-emerald-600">FACTOR 150 - GESTÃO 2026</h1>
-                    <p class="text-xs font-bold text-slate-500 uppercase">Barbacena: Salário + iFood + Parcelamento</p>
+                    <h1 class="text-xl font-black text-slate-800 tracking-tight">FACTOR 150 <span class="text-emerald-600">STRATEGY</span></h1>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Consultoria Financeira Automática | Barbacena-MG</p>
                 </div>
             </div>
-            <div class="hidden md:flex gap-4">
-                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Meta: Compra em Maio</span>
+            <div class="flex gap-6 items-center">
+                <div class="hidden md:block text-right">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Reserva Inicial (XP)</p>
+                    <div class="flex items-center gap-1 justify-end font-black text-emerald-600">
+                        <span>R$</span>
+                        <input type="number" id="initialReserve" value="8200" class="bg-transparent border-none focus:ring-0 w-20 p-0 text-right outline-none" oninput="update()">
+                    </div>
+                </div>
+                <div class="h-10 w-px bg-slate-200"></div>
+                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition">Exportar PDF</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- Top KPIs -->
+        <!-- Alerta de Consultoria -->
+        <div id="aiAlert" class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg flex items-start gap-3">
+            <span class="text-xl">💡</span>
+            <div>
+                <h4 class="text-sm font-bold text-emerald-900">Análise do Planejamento</h4>
+                <p id="aiInsightText" class="text-xs text-emerald-700">Calculando projeções baseadas nos novos custos fixos...</p>
+            </div>
+        </div>
+
+        <!-- Dashboard KPIs -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="card p-6 border-l-4 border-emerald-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4">Simulador iFood</h3>
+            <div class="card p-6 border-b-4 border-emerald-500">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Operação iFood</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-500 font-bold">Meta R$</span>
+                        <input type="number" id="ifoodMetaInput" value="1050" class="w-12 text-[10px] font-bold bg-slate-100 rounded px-1" oninput="update()">
+                    </div>
+                </div>
                 <div class="flex items-center justify-between">
-                    <span class="font-bold text-slate-700">Operar FDS</span>
-                    <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" name="toggle" id="ifoodToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 left-0 transition-all duration-300" checked/>
+                    <span class="font-black text-slate-700 text-lg" id="statusLabel">Ativado</span>
+                    <div class="relative inline-block w-12 h-6 align-middle select-none">
+                        <input type="checkbox" id="ifoodToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 left-0 transition-all duration-300" checked/>
                         <label for="ifoodToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
                     </div>
                 </div>
             </div>
 
-            <div class="card p-6">
-                <span class="text-slate-400 text-xs font-bold uppercase">Parcela Moto (XP)</span>
-                <div class="mt-2"><span class="text-2xl font-black text-slate-800 kpi-value">R$ 590,00</span></div>
-                <span class="text-[10px] text-slate-500">Fixo de Maio a Dezembro</span>
+            <div class="card p-6 border-b-4 border-blue-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Saldo Final Previsto</h3>
+                <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiFinal">R$ 0,00</div>
+                <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">Maio/2027</p>
             </div>
 
-            <div class="card p-6">
-                <span class="text-slate-400 text-xs font-bold uppercase">Média Sobra iFood</span>
-                <div class="mt-2"><span class="text-2xl font-black text-emerald-600 kpi-value" id="kpiIfood">R$ 660,00</span></div>
-                <span class="text-[10px] text-slate-500">Líquido após combustível/óleo</span>
+            <div class="card p-6 border-b-4 border-purple-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Menor Saldo (Piso)</h3>
+                <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiMinSaldo">R$ 0,00</div>
+                <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">Pós-entrada Moto</p>
             </div>
 
-            <div class="card p-6 bg-slate-800 text-white">
-                <span class="text-slate-400 text-xs font-bold uppercase">Saldo Final Ano (Est.)</span>
-                <div class="mt-2"><span class="text-2xl font-black text-emerald-400 kpi-value" id="kpiFinal">R$ 0,00</span></div>
-                <span class="text-[10px] text-slate-300">Reserva acumulada em Dezembro</span>
+            <div class="card p-6 border-b-4 border-amber-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Recuperação da Reserva</h3>
+                <div class="flex items-end gap-2">
+                    <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiProgresso">0%</div>
+                </div>
+                <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div id="progressBar" class="progress-bar bg-amber-500 h-full w-0"></div>
+                </div>
             </div>
         </section>
 
-        <!-- Main Visuals -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <!-- Evolution Chart -->
-                <div class="card p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">Composição de Gastos vs Receita</h3>
-                    <div class="chart-container">
-                        <canvas id="mainFinanceChart"></canvas>
-                    </div>
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-sm uppercase">Sobra Mensal</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyInvestmentChart"></canvas>
                 </div>
             </div>
-
-            <!-- Costs Column -->
-            <div class="space-y-6">
-                <div class="card p-6 border-t-4 border-blue-500">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <span>📋</span> Resumo Mensal (Pós-Maio)
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Salário CLT (Líquido)</span>
-                            <span class="font-bold text-slate-700">R$ 1.622,00</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Custos Fixos Pessoais</span>
-                            <span class="font-bold text-red-500">- R$ 603,37</span>
-                        </div>
-                        <div class="flex justify-between text-sm border-b pb-2">
-                            <span class="text-slate-500">Margem de Segurança</span>
-                            <span class="font-bold text-orange-500">- R$ 150,00</span>
-                        </div>
-                        <div class="flex justify-between text-sm pt-2">
-                            <span class="text-slate-800 font-bold italic underline">Custos da Moto:</span>
-                        </div>
-                        <div class="flex justify-between text-sm pl-2">
-                            <span class="text-slate-500">Parcela Cartão XP</span>
-                            <span class="font-bold text-red-600">- R$ 590,00</span>
-                        </div>
-                        <div class="flex justify-between text-sm pl-2">
-                            <span class="text-slate-500">Manutenção/Operação</span>
-                            <span class="font-bold text-red-600">- R$ 120,00</span>
-                        </div>
-                    </div>
+            <div class="card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-sm uppercase">Evolução do Patrimônio</h3>
                 </div>
-
-                <div class="card p-6 bg-emerald-900 text-white">
-                    <h4 class="font-bold text-emerald-400 text-sm mb-2 tracking-widest uppercase">Efeito iFood</h4>
-                    <p class="text-xs text-emerald-100 leading-relaxed">
-                        A operação de iFood em Barbacena (FDS) é o que garante que o parcelamento da moto não consuma sua reserva de emergência. 
-                        Com ele, a parcela de R$ 590 é "paga" pelo trabalho extra, sobrando ainda R$ 70 de lucro real.
-                    </p>
+                <div class="chart-container">
+                    <canvas id="accumulationChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Detailed Table -->
-        <section class="card overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b flex justify-between items-center">
-                <h3 class="font-bold text-slate-800">Planilha de Fluxo de Caixa 2026</h3>
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Detalhamento por Categoria</span>
+        <!-- Tabela Principal -->
+        <div class="card overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b">
+                <h3 class="font-bold text-slate-800">Planilha de Controle Dinâmico</h3>
+                <p class="text-[10px] text-slate-500 uppercase font-bold">Valores atualizados conforme sua última imagem</p>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                    <thead class="bg-slate-100 text-slate-500 uppercase">
-                        <tr>
-                            <th class="px-4 py-4">Mês</th>
-                            <th class="px-4 py-4 text-right">Salário</th>
-                            <th class="px-4 py-4 text-right">Fixo Pessoal</th>
-                            <th class="px-4 py-4 text-right">Var. Pessoal</th>
-                            <th class="px-4 py-4 text-right bg-blue-50/50">Parcela Moto</th>
-                            <th class="px-4 py-4 text-right bg-blue-50/50">Custo Moto</th>
-                            <th class="px-4 py-4 text-right text-emerald-600 font-bold">iFood (+)</th>
-                            <th class="px-4 py-4 text-right font-black">Sobra Final</th>
+                <table class="w-full text-left text-[10px] border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-500 uppercase font-black border-b">
+                            <th class="px-3 py-4 border-r">Mês</th>
+                            <th class="px-2 py-4 text-center bg-emerald-50 text-emerald-700">Salário</th>
+                            <th class="px-2 py-4 text-center bg-emerald-50 text-emerald-700">iFood</th>
+                            <th class="px-2 py-4 text-center bg-red-50 text-red-700">Fixo Antigo</th>
+                            <th class="px-2 py-4 text-center bg-red-50 text-red-700">Var (150)</th>
+                            <th class="px-2 py-4 text-center bg-orange-50 text-orange-700">Parc. Moto</th>
+                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Gasol.</th>
+                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Seguro</th>
+                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Manut.</th>
+                            <th class="px-2 py-4 text-center bg-slate-200 text-slate-700">Entrada</th>
+                            <th class="px-3 py-4 text-right font-black bg-blue-50 text-blue-800 border-x">Sobra</th>
+                            <th class="px-3 py-4 text-right bg-slate-900 text-white font-black">Saldo XP</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100" id="tableBody">
-                        <!-- JS Render -->
+                    <tbody id="tableBody" class="divide-y divide-slate-100 font-medium">
+                        <!-- Gerado via JS -->
                     </tbody>
                 </table>
             </div>
-        </section>
-
+        </div>
     </main>
 
     <script>
-        const months = ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const months = [
+            'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26',
+            'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27'
+        ];
         
-        // Data Structure based on user request:
-        // Salário | Fixo Pessoal | Var Pessoal | Parcela Moto | Custo Moto | iFood
-        const rawData = [
-            { m: 'Mar', sal: 1622, fixP: 1612, varP: 0, parcM: 0, costM: 0, ifood: 0 },
-            { m: 'Abr', sal: 1622, fixP: 1061, varP: 150, parcM: 0, costM: 0, ifood: 0 },
-            { m: 'Mai', sal: 1622, fixP: 816, varP: 150, parcM: 590, costM: 0, ifood: 0 },
-            { m: 'Jun', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 120, ifood: 660 },
-            { m: 'Jul', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 50, ifood: 660 },
-            { m: 'Ago', sal: 1622, fixP: 771, varP: 150, parcM: 590, costM: 50, ifood: 660 },
-            { m: 'Set', sal: 1622, fixP: 641, varP: 150, parcM: 590, costM: 50, ifood: 660 },
-            { m: 'Out', sal: 1622, fixP: 641, varP: 150, parcM: 590, costM: 250, ifood: 660 },
-            { m: 'Nov', sal: 1622, fixP: 603, varP: 150, parcM: 590, costM: 50, ifood: 660 },
-            { m: 'Dez', sal: 1622, fixP: 603, varP: 150, parcM: 590, costM: 50, ifood: 660 }
+        // Dados Atualizados conforme imagem enviada pelo usuário
+        let rawData = [
+            { m: 'Mar/26', sal: 1622, ifood: 0, fixP: 1612, varP: 0, parcM: 0, fuel: 0, insurance: 0, maint: 0, down: 0 }, 
+            { m: 'Abr/26', sal: 1622, ifood: 0, fixP: 1061.18, varP: 150, parcM: 0, fuel: 0, insurance: 0, maint: 0, down: 0 }, 
+            { m: 'Mai/26', sal: 1622, ifood: 0, fixP: 816.59, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 5000 },
+            { m: 'Jun/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Jul/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Ago/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Set/26', sal: 1622, ifood: 0, fixP: 669.52, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Out/26', sal: 1622, ifood: 0, fixP: 669.52, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Nov/26', sal: 1622, ifood: 0, fixP: 621.57, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Dez/26', sal: 1622, ifood: 0, fixP: 577.40, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Jan/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Fev/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Mar/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Abr/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
+            { m: 'Mai/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 }
         ];
 
         const toggle = document.getElementById('ifoodToggle');
-        const kpiIfood = document.getElementById('kpiIfood');
-        const kpiFinal = document.getElementById('kpiFinal');
+        const metaIfoodInput = document.getElementById('ifoodMetaInput');
+        const initialReserveInput = document.getElementById('initialReserve');
         const tableBody = document.getElementById('tableBody');
-        let chart = null;
+        
+        let chartBar = null;
+        let chartLine = null;
+
+        function updateDataValue(index, field, value) {
+            rawData[index][field] = parseFloat(value) || 0;
+            update();
+        }
 
         function formatBRL(v) {
             return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
         function update() {
-            const isIfood = toggle.checked;
-            let totalAccumulated = 0;
+            const isIfoodActive = toggle.checked;
+            const globalIfoodMeta = parseFloat(metaIfoodInput.value) || 0;
+            const initialReserve = parseFloat(initialReserveInput.value) || 8200;
+            let currentTotalReserve = initialReserve;
+            let minSaldo = initialReserve;
             
-            const processed = rawData.map(d => {
-                const currentIfood = isIfood ? d.ifood : 0;
-                const sobra = d.sal - d.fixP - d.varP - d.parcM - d.costM + currentIfood;
-                totalAccumulated += sobra;
-                return { ...d, currentIfood, sobra };
+            const historyTotal = [];
+            const historySobra = [];
+            
+            let html = "";
+            rawData.forEach((d, i) => {
+                // Se o iFood estiver ATIVO, usamos os custos de trabalho (ex: 240 gasolina)
+                // Se estiver DESATIVADO (estado da imagem), usamos custos de uso pessoal (ex: 50 gasolina)
+                if (isIfoodActive && i >= 2) { 
+                    d.ifood = globalIfoodMeta;
+                    d.fuel = 240; 
+                    d.maint = 70;
+                } else if (!isIfoodActive && i >= 2) {
+                    d.ifood = 0;
+                    d.fuel = 50; 
+                    d.maint = 30;
+                }
+
+                const receita = d.sal + d.ifood;
+                const despesa = d.fixP + d.varP + d.parcM + d.fuel + d.insurance + d.maint + d.down;
+                const sobraMes = receita - despesa;
+                currentTotalReserve += sobraMes;
+                
+                if (currentTotalReserve < minSaldo) minSaldo = currentTotalReserve;
+                
+                historyTotal.push(currentTotalReserve);
+                historySobra.push(sobraMes);
+
+                html += `
+                    <tr class="hover:bg-slate-50 transition-colors border-b">
+                        <td class="px-2 py-3 font-bold text-slate-700 border-r bg-slate-50">${d.m}</td>
+                        <td class="px-1 py-1 text-center bg-emerald-50/20">
+                            <input type="number" step="0.01" value="${d.sal}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'sal', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-emerald-50/20">
+                            <input type="number" step="0.01" value="${d.ifood}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded font-bold text-emerald-700" oninput="updateDataValue(${i}, 'ifood', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-red-50/20">
+                            <input type="number" step="0.01" value="${d.fixP}" class="w-16 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'fixP', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-red-50/20">
+                            <input type="number" step="0.01" value="${d.varP}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'varP', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-orange-50/20">
+                            <input type="number" step="0.01" value="${d.parcM}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded font-bold" oninput="updateDataValue(${i}, 'parcM', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-amber-50/30">
+                            <input type="number" step="0.01" value="${d.fuel}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'fuel', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-amber-50/30">
+                            <input type="number" step="0.01" value="${d.insurance}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'insurance', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-amber-50/30">
+                            <input type="number" step="0.01" value="${d.maint}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'maint', this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-center bg-slate-200/20 font-bold">
+                            <input type="number" step="0.01" value="${d.down}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded text-red-600" oninput="updateDataValue(${i}, 'down', this.value)">
+                        </td>
+                        <td class="px-2 py-3 text-right font-black border-x bg-blue-50/30 ${sobraMes < 0 ? 'text-red-600' : 'text-blue-800'}">${formatBRL(sobraMes)}</td>
+                        <td class="px-2 py-3 text-right font-black bg-slate-900 text-white">${formatBRL(currentTotalReserve)}</td>
+                    </tr>
+                `;
             });
 
-            // Update KPIs
-            kpiIfood.innerText = isIfood ? "R$ 660,00" : "R$ 0,00";
-            kpiFinal.innerText = formatBRL(totalAccumulated);
-
-            // Update Table
-            tableBody.innerHTML = processed.map(d => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 font-bold text-slate-700">${d.m}</td>
-                    <td class="px-4 py-3 text-right text-slate-600">${formatBRL(d.sal)}</td>
-                    <td class="px-4 py-3 text-right text-red-400">${formatBRL(d.fixP)}</td>
-                    <td class="px-4 py-3 text-right text-orange-400">${formatBRL(d.varP)}</td>
-                    <td class="px-4 py-3 text-right bg-blue-50/30 text-red-600 font-medium">${formatBRL(d.parcM)}</td>
-                    <td class="px-4 py-3 text-right bg-blue-50/30 text-red-600">${formatBRL(d.costM)}</td>
-                    <td class="px-4 py-3 text-right font-bold text-emerald-600">${formatBRL(d.currentIfood)}</td>
-                    <td class="px-4 py-3 text-right font-black ${d.sobra < 0 ? 'text-red-600' : 'text-slate-900'}">${formatBRL(d.sobra)}</td>
-                </tr>
-            `).join('');
-
-            renderChart(processed);
+            tableBody.innerHTML = html;
+            updateKPIs(currentTotalReserve, initialReserve, minSaldo);
+            renderCharts(historyTotal, historySobra);
         }
 
-        function renderChart(data) {
-            const ctx = document.getElementById('mainFinanceChart').getContext('2d');
+        function updateKPIs(final, initial, min) {
+            document.getElementById('kpiFinal').innerText = formatBRL(final);
+            document.getElementById('kpiMinSaldo').innerText = formatBRL(min);
             
-            if (chart) chart.destroy();
+            const progress = Math.max(0, Math.min(100, (final / initial) * 100)).toFixed(1);
+            document.getElementById('kpiProgresso').innerText = progress + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            const aiText = document.getElementById('aiInsightText');
+            if (!toggle.checked) {
+                aiText.innerText = "Simulação: Sem iFood, sua reserva cai pela metade mas se mantém estável acima de R$ 3.300.";
+            } else {
+                aiText.innerText = "Com iFood, seu patrimônio cresce exponencialmente, superando os R$ 8.200 originais rapidamente.";
+            }
+        }
 
-            chart = new Chart(ctx, {
+        function renderCharts(totalHistory, sobraHistory) {
+            const ctxBar = document.getElementById('monthlyInvestmentChart').getContext('2d');
+            const ctxLine = document.getElementById('accumulationChart').getContext('2d');
+            
+            if (chartBar) chartBar.destroy();
+            if (chartLine) chartLine.destroy();
+
+            chartBar = new Chart(ctxBar, {
                 type: 'bar',
                 data: {
                     labels: months,
-                    datasets: [
-                        {
-                            label: 'Gasto Pessoal',
-                            data: data.map(d => d.fixP + d.varP),
-                            backgroundColor: '#94a3b8'
-                        },
-                        {
-                            label: 'Gasto Moto (Parcela + Custo)',
-                            data: data.map(d => d.parcM + d.costM),
-                            backgroundColor: '#ef4444'
-                        },
-                        {
-                            label: 'Sobra Líquida',
-                            data: data.map(d => d.sobra),
-                            backgroundColor: '#10b981'
-                        }
-                    ]
+                    datasets: [{
+                        label: 'Sobra Líquida (R$)',
+                        data: sobraHistory,
+                        backgroundColor: sobraHistory.map(v => v < 0 ? '#ef4444' : '#3b82f6'),
+                        borderRadius: 4
+                    }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: (items) => items[0].label,
-                                label: (item) => `${item.dataset.label}: ${formatBRL(item.raw)}`
-                            }
-                        }
-                    }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { display: false } }, x: { grid: { display: false } } }
+                }
+            });
+
+            chartLine = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Saldo XP (R$)',
+                        data: totalHistory,
+                        borderColor: '#10b981',
+                        borderWidth: 4,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        tension: 0.3
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
                 }
             });
         }
 
-        toggle.addEventListener('change', update);
+        toggle.addEventListener('change', () => {
+            document.getElementById('statusLabel').innerText = toggle.checked ? 'Ativado' : 'Pausado';
+            update();
+        });
+        
         update();
     </script>
 </body>
