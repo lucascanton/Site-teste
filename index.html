@@ -3,341 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Factor 150 - Planejamento Financeiro 2026-2027</title>
+    <title>Factor 150 - Ultimate Strategic BI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
-        .chart-container { position: relative; width: 100%; height: 280px; }
-        .card { background-color: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
-        .kpi-value { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
-        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
-        .progress-bar { transition: width 1s ease-in-out; }
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .input-cell { background: transparent; border: none; outline: none; width: 100%; text-align: center; font-variant-numeric: tabular-nums; font-size: 11px; padding: 6px; border-radius: 6px; transition: 0.2s; font-weight: 700; }
+        .input-cell:hover { background: #f1f5f9; }
+        .input-cell:focus { background: white; box-shadow: 0 0 0 2px #10b981; }
+        .panel-input { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.5rem; font-weight: 800; font-size: 0.875rem; width: 100%; outline: none; color: #1e293b; }
+        .panel-input:focus { border-color: #10b981; background: white; }
     </style>
 </head>
-<body class="antialiased selection:bg-emerald-200 pb-12">
+<body class="pb-12 px-4">
 
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-200">🏍️</div>
+    <header class="max-w-7xl mx-auto py-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div class="flex items-center gap-4">
+                <div class="bg-slate-900 p-3 rounded-2xl text-white shadow-xl">
+                    <i data-lucide="component" class="w-8 h-8"></i>
+                </div>
                 <div>
-                    <h1 class="text-xl font-black text-slate-800 tracking-tight">FACTOR 150 <span class="text-emerald-600">STRATEGY</span></h1>
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Consultoria Financeira Automática | Barbacena-MG</p>
+                    <h1 class="text-3xl font-extrabold tracking-tighter italic uppercase">Factor 150 <span class="text-emerald-600">Strategic</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Gestão Patrimonial e Fluxo de Caixa</p>
                 </div>
             </div>
-            <div class="flex gap-6 items-center">
-                <div class="hidden md:block text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Reserva Inicial (XP)</p>
-                    <div class="flex items-center gap-1 justify-end font-black text-emerald-600">
-                        <span>R$</span>
-                        <input type="number" id="initialReserve" value="8200" class="bg-transparent border-none focus:ring-0 w-20 p-0 text-right outline-none" oninput="update()">
-                    </div>
+            
+            <div class="glass-card p-5 grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-auto border-emerald-100 bg-emerald-50/30">
+                <div>
+                    <label class="text-[9px] font-black text-emerald-700 uppercase mb-1 block">Salário Base</label>
+                    <input type="number" id="inputSal" value="1622" class="panel-input" oninput="applyGlobalInputs()">
                 </div>
-                <div class="h-10 w-px bg-slate-200"></div>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition">Exportar PDF</button>
+                <div>
+                    <label class="text-[9px] font-black text-emerald-500 uppercase mb-1 block">Meta iFood</label>
+                    <input type="number" id="inputIfood" value="1050" class="panel-input" oninput="applyGlobalInputs()">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-blue-500 uppercase mb-1 block">Meta M.Livre</label>
+                    <input type="number" id="inputML" value="640" class="panel-input" oninput="applyGlobalInputs()">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-500 uppercase mb-1 block">Reserva XP</label>
+                    <input type="number" id="inputReserva" value="8200" class="panel-input text-emerald-600" oninput="update()">
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-
-        <!-- Alerta de Consultoria -->
-        <div id="aiAlert" class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg flex items-start gap-3">
-            <span class="text-xl">💡</span>
-            <div>
-                <h4 class="text-sm font-bold text-emerald-900">Análise do Planejamento</h4>
-                <p id="aiInsightText" class="text-xs text-emerald-700">Calculando projeções baseadas nos novos custos fixos...</p>
+    <main class="max-w-7xl mx-auto space-y-8">
+        
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card p-6 border-l-8 border-emerald-600">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Patrimônio Previsto (15 meses)</span>
+                <div id="kpiFinal" class="text-3xl font-black text-slate-900">R$ 0</div>
             </div>
-        </div>
+            <div class="glass-card p-6 border-l-8 border-red-600">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Ponto Crítico de Reserva</span>
+                <div id="kpiPiso" class="text-3xl font-black text-red-600">R$ 0</div>
+            </div>
+            <div class="glass-card p-6 bg-slate-900 text-white">
+                <span class="text-[10px] font-bold text-slate-400 uppercase mb-2 block">Modo de Operação</span>
+                <select id="extraStatus" class="w-full bg-slate-800 border-none text-xs font-bold p-3 rounded-xl outline-none" onchange="applyGlobalInputs()">
+                    <option value="both" selected>Full (iFood + M.Livre)</option>
+                    <option value="ifood">Foco iFood</option>
+                    <option value="ml">Foco M.Livre</option>
+                    <option value="none">Apenas CLT</option>
+                </select>
+            </div>
+        </section>
 
-        <!-- Dashboard KPIs -->
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="card p-6 border-b-4 border-emerald-500">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Operação iFood</h3>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-slate-500 font-bold">Meta R$</span>
-                        <input type="number" id="ifoodMetaInput" value="1050" class="w-12 text-[10px] font-bold bg-slate-100 rounded px-1" oninput="update()">
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="glass-card p-8 lg:col-span-2">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i data-lucide="area-chart" class="w-4 h-4 text-emerald-600"></i> Performance de Acúmulo
+                </h3>
+                <div class="h-[350px]"><canvas id="chartPrincipal"></canvas></div>
+            </div>
+            
+            <div class="glass-card p-8 bg-slate-50/50">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Análise Mensal Detalhada</h3>
+                <select id="monthSelector" class="w-full bg-white border border-slate-200 p-3 rounded-xl text-xs font-bold outline-none mb-6 shadow-sm" onchange="renderAnalysisCharts()">
+                </select>
+                
+                <div class="space-y-8">
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block text-center mb-2 italic">Composição de Gastos (Psicologia Visual)</span>
+                        <div class="h-[200px]"><canvas id="chartGastos"></canvas></div>
                     </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-slate-700 text-lg" id="statusLabel">Ativado</span>
-                    <div class="relative inline-block w-12 h-6 align-middle select-none">
-                        <input type="checkbox" id="ifoodToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 left-0 transition-all duration-300" checked/>
-                        <label for="ifoodToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                    <div class="border-t border-slate-200 pt-6">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block text-center mb-2 italic">Equilíbrio Renda vs. Despesa</span>
+                        <div class="h-[200px]"><canvas id="chartRendaVsGasto"></canvas></div>
                     </div>
-                </div>
-            </div>
-
-            <div class="card p-6 border-b-4 border-blue-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Saldo Final Previsto</h3>
-                <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiFinal">R$ 0,00</div>
-                <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">Maio/2027</p>
-            </div>
-
-            <div class="card p-6 border-b-4 border-purple-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Menor Saldo (Piso)</h3>
-                <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiMinSaldo">R$ 0,00</div>
-                <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">Pós-entrada Moto</p>
-            </div>
-
-            <div class="card p-6 border-b-4 border-amber-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Recuperação da Reserva</h3>
-                <div class="flex items-end gap-2">
-                    <div class="text-2xl font-black text-slate-800 kpi-value" id="kpiProgresso">0%</div>
-                </div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-                    <div id="progressBar" class="progress-bar bg-amber-500 h-full w-0"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-slate-800 text-sm uppercase">Sobra Mensal</h3>
+        <section class="glass-card overflow-hidden">
+            <div class="p-6 bg-white border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest italic flex items-center gap-2">
+                    <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i> Memória de Cálculo Operacional
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="applyFinance(380, 4500)" class="bg-emerald-600 text-white text-[10px] font-black px-4 py-2 rounded-lg hover:bg-emerald-700 transition shadow-lg shadow-emerald-100">CONSÓRCIO (380/4500)</button>
+                    <button onclick="applyFinance(590, 5000)" class="bg-blue-600 text-white text-[10px] font-black px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100">CARTÃO (590/5000)</button>
                 </div>
-                <div class="chart-container">
-                    <canvas id="monthlyInvestmentChart"></canvas>
-                </div>
-            </div>
-            <div class="card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-slate-800 text-sm uppercase">Evolução do Patrimônio</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="accumulationChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela Principal -->
-        <div class="card overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b">
-                <h3 class="font-bold text-slate-800">Planilha de Controle Dinâmico</h3>
-                <p class="text-[10px] text-slate-500 uppercase font-bold">Valores atualizados conforme sua última imagem</p>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-[10px] border-collapse">
+                <table class="w-full text-[11px] border-collapse">
                     <thead>
-                        <tr class="bg-slate-100 text-slate-500 uppercase font-black border-b">
-                            <th class="px-3 py-4 border-r">Mês</th>
-                            <th class="px-2 py-4 text-center bg-emerald-50 text-emerald-700">Salário</th>
-                            <th class="px-2 py-4 text-center bg-emerald-50 text-emerald-700">iFood</th>
-                            <th class="px-2 py-4 text-center bg-red-50 text-red-700">Fixo Antigo</th>
-                            <th class="px-2 py-4 text-center bg-red-50 text-red-700">Var (150)</th>
-                            <th class="px-2 py-4 text-center bg-orange-50 text-orange-700">Parc. Moto</th>
-                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Gasol.</th>
-                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Seguro</th>
-                            <th class="px-2 py-4 text-center bg-amber-50 text-amber-700">Manut.</th>
-                            <th class="px-2 py-4 text-center bg-slate-200 text-slate-700">Entrada</th>
-                            <th class="px-3 py-4 text-right font-black bg-blue-50 text-blue-800 border-x">Sobra</th>
-                            <th class="px-3 py-4 text-right bg-slate-900 text-white font-black">Saldo XP</th>
+                        <tr class="bg-slate-50 text-slate-400 uppercase font-black border-b text-[9px] text-center">
+                            <th class="px-6 py-5 text-left text-slate-800 border-r">Período</th>
+                            <th class="text-emerald-800">Salário</th>
+                            <th class="text-emerald-500">Extra</th>
+                            <th class="text-amber-600">Fixo</th>
+                            <th class="text-amber-500">G. Pessoal</th>
+                            <th class="text-orange-600">Parcela</th>
+                            <th class="text-orange-500">Gasolina</th>
+                            <th class="text-orange-400">Seguro</th>
+                            <th class="text-orange-400">Manut.</th>
+                            <th class="bg-red-50 text-red-600">Entrada</th>
+                            <th class="bg-emerald-600 text-white">Sobra</th>
+                            <th class="bg-slate-900 text-white text-right px-6">Saldo XP</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 font-medium">
-                        <!-- Gerado via JS -->
-                    </tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
-        </div>
+        </section>
     </main>
 
     <script>
-        const months = [
-            'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26',
-            'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27'
-        ];
+        const months = ['Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26', 'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27'];
         
-        // Dados Atualizados conforme imagem enviada pelo usuário
-        let rawData = [
-            { m: 'Mar/26', sal: 1622, ifood: 0, fixP: 1612, varP: 0, parcM: 0, fuel: 0, insurance: 0, maint: 0, down: 0 }, 
-            { m: 'Abr/26', sal: 1622, ifood: 0, fixP: 1061.18, varP: 150, parcM: 0, fuel: 0, insurance: 0, maint: 0, down: 0 }, 
-            { m: 'Mai/26', sal: 1622, ifood: 0, fixP: 816.59, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 5000 },
-            { m: 'Jun/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Jul/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Ago/26', sal: 1622, ifood: 0, fixP: 789.79, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Set/26', sal: 1622, ifood: 0, fixP: 669.52, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Out/26', sal: 1622, ifood: 0, fixP: 669.52, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Nov/26', sal: 1622, ifood: 0, fixP: 621.57, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Dez/26', sal: 1622, ifood: 0, fixP: 577.40, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Jan/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Fev/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Mar/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Abr/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 },
-            { m: 'Mai/27', sal: 1622, ifood: 0, fixP: 549.35, varP: 150, parcM: 590, fuel: 50, insurance: 80, maint: 30, down: 0 }
-        ];
+        let rawData = months.map((m, i) => {
+            let base = { m, sal: 1622, extra: 1690, personal: 150, parcM: 590, fuel: 240, insurance: 80, maint: 70, down: 0 };
+            const fixos = [1612, 1061.18, 816.59, 789.79, 789.79, 789.79, 669.52, 669.52, 621.57, 577.40, 549.35, 549.35, 549.35, 549.35, 549.35];
+            base.fix = fixos[i];
+            if(i === 0) { base.extra=0; base.parcM=0; base.fuel=0; base.insurance=0; base.maint=0; base.personal=0; }
+            if(i === 1) { base.extra=0; base.parcM=0; base.fuel=0; base.insurance=0; base.maint=0; }
+            if(i === 2) { base.down = 5000; }
+            return base;
+        });
 
-        const toggle = document.getElementById('ifoodToggle');
-        const metaIfoodInput = document.getElementById('ifoodMetaInput');
-        const initialReserveInput = document.getElementById('initialReserve');
-        const tableBody = document.getElementById('tableBody');
-        
-        let chartBar = null;
-        let chartLine = null;
+        let mainChart, gastosChart, balanceChart;
 
-        function updateDataValue(index, field, value) {
-            rawData[index][field] = parseFloat(value) || 0;
+        const selector = document.getElementById('monthSelector');
+        months.forEach((m, i) => {
+            const opt = document.createElement('option');
+            opt.value = i; opt.innerText = "Ver Análise de " + m;
+            if(i === 2) opt.selected = true;
+            selector.appendChild(opt);
+        });
+
+        function applyGlobalInputs() {
+            const sal = parseFloat(document.getElementById('inputSal').value) || 0;
+            const ifood = parseFloat(document.getElementById('inputIfood').value) || 0;
+            const ml = parseFloat(document.getElementById('inputML').value) || 0;
+            const status = document.getElementById('extraStatus').value;
+
+            rawData.forEach((d, i) => {
+                d.sal = sal;
+                if(i >= 2) {
+                    if(status === 'both') d.extra = ifood + ml;
+                    else if(status === 'ifood') d.extra = ifood;
+                    else if(status === 'ml') d.extra = ml;
+                    else d.extra = 0;
+                }
+            });
             update();
         }
 
-        function formatBRL(v) {
-            return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        function updateData(i, field, val) {
+            rawData[i][field] = parseFloat(val) || 0;
+            update();
+        }
+
+        function applyFinance(parc, down) {
+            rawData.forEach((d, i) => {
+                if(i >= 2) d.parcM = parc;
+                if(i === 2) d.down = down;
+            });
+            update();
         }
 
         function update() {
-            const isIfoodActive = toggle.checked;
-            const globalIfoodMeta = parseFloat(metaIfoodInput.value) || 0;
-            const initialReserve = parseFloat(initialReserveInput.value) || 8200;
-            let currentTotalReserve = initialReserve;
-            let minSaldo = initialReserve;
-            
-            const historyTotal = [];
-            const historySobra = [];
-            
+            const initial = parseFloat(document.getElementById('inputReserva').value) || 0;
+            let current = initial;
+            let minS = initial, minM = months[0];
+            const hTotal = [], hSobras = [];
             let html = "";
+
             rawData.forEach((d, i) => {
-                // Se o iFood estiver ATIVO, usamos os custos de trabalho (ex: 240 gasolina)
-                // Se estiver DESATIVADO (estado da imagem), usamos custos de uso pessoal (ex: 50 gasolina)
-                if (isIfoodActive && i >= 2) { 
-                    d.ifood = globalIfoodMeta;
-                    d.fuel = 240; 
-                    d.maint = 70;
-                } else if (!isIfoodActive && i >= 2) {
-                    d.ifood = 0;
-                    d.fuel = 50; 
-                    d.maint = 30;
-                }
+                const rec = d.sal + d.extra;
+                const gas = d.fix + d.personal + d.parcM + d.fuel + d.insurance + d.maint + d.down;
+                const sob = rec - gas;
+                current += sob;
 
-                const receita = d.sal + d.ifood;
-                const despesa = d.fixP + d.varP + d.parcM + d.fuel + d.insurance + d.maint + d.down;
-                const sobraMes = receita - despesa;
-                currentTotalReserve += sobraMes;
-                
-                if (currentTotalReserve < minSaldo) minSaldo = currentTotalReserve;
-                
-                historyTotal.push(currentTotalReserve);
-                historySobra.push(sobraMes);
+                if(current < minS) { minS = current; minM = d.m; }
+                hTotal.push(current);
+                hSobras.push(sob);
 
-                html += `
-                    <tr class="hover:bg-slate-50 transition-colors border-b">
-                        <td class="px-2 py-3 font-bold text-slate-700 border-r bg-slate-50">${d.m}</td>
-                        <td class="px-1 py-1 text-center bg-emerald-50/20">
-                            <input type="number" step="0.01" value="${d.sal}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'sal', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-emerald-50/20">
-                            <input type="number" step="0.01" value="${d.ifood}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded font-bold text-emerald-700" oninput="updateDataValue(${i}, 'ifood', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-red-50/20">
-                            <input type="number" step="0.01" value="${d.fixP}" class="w-16 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'fixP', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-red-50/20">
-                            <input type="number" step="0.01" value="${d.varP}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'varP', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-orange-50/20">
-                            <input type="number" step="0.01" value="${d.parcM}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded font-bold" oninput="updateDataValue(${i}, 'parcM', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-amber-50/30">
-                            <input type="number" step="0.01" value="${d.fuel}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'fuel', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-amber-50/30">
-                            <input type="number" step="0.01" value="${d.insurance}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'insurance', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-amber-50/30">
-                            <input type="number" step="0.01" value="${d.maint}" class="w-10 bg-transparent text-center outline-none focus:bg-white rounded" oninput="updateDataValue(${i}, 'maint', this.value)">
-                        </td>
-                        <td class="px-1 py-1 text-center bg-slate-200/20 font-bold">
-                            <input type="number" step="0.01" value="${d.down}" class="w-14 bg-transparent text-center outline-none focus:bg-white rounded text-red-600" oninput="updateDataValue(${i}, 'down', this.value)">
-                        </td>
-                        <td class="px-2 py-3 text-right font-black border-x bg-blue-50/30 ${sobraMes < 0 ? 'text-red-600' : 'text-blue-800'}">${formatBRL(sobraMes)}</td>
-                        <td class="px-2 py-3 text-right font-black bg-slate-900 text-white">${formatBRL(currentTotalReserve)}</td>
-                    </tr>
-                `;
+                html += `<tr class="text-center font-semibold">
+                    <td class="px-6 py-4 font-bold bg-slate-50 border-r text-left text-slate-500">${d.m}</td>
+                    <td><input type="number" value="${d.sal}" class="input-cell" oninput="updateData(${i}, 'sal', this.value)"></td>
+                    <td class="text-emerald-600"><input type="number" value="${d.extra}" class="input-cell" oninput="updateData(${i}, 'extra', this.value)"></td>
+                    <td><input type="number" value="${d.fix}" class="input-cell" oninput="updateData(${i}, 'fix', this.value)"></td>
+                    <td><input type="number" value="${d.personal}" class="input-cell" oninput="updateData(${i}, 'personal', this.value)"></td>
+                    <td class="text-orange-600"><input type="number" value="${d.parcM}" class="input-cell" oninput="updateData(${i}, 'parcM', this.value)"></td>
+                    <td><input type="number" value="${d.fuel}" class="input-cell" oninput="updateData(${i}, 'fuel', this.value)"></td>
+                    <td><input type="number" value="${d.insurance}" class="input-cell" oninput="updateData(${i}, 'insurance', this.value)"></td>
+                    <td><input type="number" value="${d.maint}" class="input-cell" oninput="updateData(${i}, 'maint', this.value)"></td>
+                    <td class="bg-red-50 text-red-700 font-bold"><input type="number" value="${d.down}" class="input-cell" oninput="updateData(${i}, 'down', this.value)"></td>
+                    <td class="bg-emerald-600 text-white font-black px-4">R$ ${sob.toFixed(0)}</td>
+                    <td class="bg-slate-900 text-white font-black px-6 text-right">R$ ${current.toFixed(0)}</td>
+                </tr>`;
             });
 
-            tableBody.innerHTML = html;
-            updateKPIs(currentTotalReserve, initialReserve, minSaldo);
-            renderCharts(historyTotal, historySobra);
+            document.getElementById('tableBody').innerHTML = html;
+            document.getElementById('kpiFinal').innerText = "R$ " + current.toLocaleString('pt-BR');
+            document.getElementById('kpiPiso').innerText = "R$ " + minS.toLocaleString('pt-BR');
+            
+            renderMainChart(hTotal, hSobras);
+            renderAnalysisCharts();
+            lucide.createIcons();
         }
 
-        function updateKPIs(final, initial, min) {
-            document.getElementById('kpiFinal').innerText = formatBRL(final);
-            document.getElementById('kpiMinSaldo').innerText = formatBRL(min);
-            
-            const progress = Math.max(0, Math.min(100, (final / initial) * 100)).toFixed(1);
-            document.getElementById('kpiProgresso').innerText = progress + '%';
-            document.getElementById('progressBar').style.width = progress + '%';
-            
-            const aiText = document.getElementById('aiInsightText');
-            if (!toggle.checked) {
-                aiText.innerText = "Simulação: Sem iFood, sua reserva cai pela metade mas se mantém estável acima de R$ 3.300.";
-            } else {
-                aiText.innerText = "Com iFood, seu patrimônio cresce exponencialmente, superando os R$ 8.200 originais rapidamente.";
-            }
-        }
-
-        function renderCharts(totalHistory, sobraHistory) {
-            const ctxBar = document.getElementById('monthlyInvestmentChart').getContext('2d');
-            const ctxLine = document.getElementById('accumulationChart').getContext('2d');
-            
-            if (chartBar) chartBar.destroy();
-            if (chartLine) chartLine.destroy();
-
-            chartBar = new Chart(ctxBar, {
-                type: 'bar',
+        function renderMainChart(total, sobras) {
+            const ctx = document.getElementById('chartPrincipal').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            mainChart = new Chart(ctx, {
                 data: {
                     labels: months,
-                    datasets: [{
-                        label: 'Sobra Líquida (R$)',
-                        data: sobraHistory,
-                        backgroundColor: sobraHistory.map(v => v < 0 ? '#ef4444' : '#3b82f6'),
-                        borderRadius: 4
-                    }]
+                    datasets: [
+                        { type: 'line', label: 'Saldo XP', data: total, borderColor: '#10b981', borderWidth: 5, tension: 0.4, fill: false, pointRadius: 5 },
+                        { type: 'bar', label: 'Sobra Líquida', data: sobras, backgroundColor: sobras.map(v => v < 0 ? '#ef4444' : '#10b981'), borderRadius: 6 }
+                    ]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
-                    scales: { y: { grid: { display: false } }, x: { grid: { display: false } } }
-                }
-            });
-
-            chartLine = new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Saldo XP (R$)',
-                        data: totalHistory,
-                        borderColor: '#10b981',
-                        borderWidth: 4,
-                        pointRadius: 0,
-                        fill: true,
-                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                        tension: 0.3
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        toggle.addEventListener('change', () => {
-            document.getElementById('statusLabel').innerText = toggle.checked ? 'Ativado' : 'Pausado';
-            update();
-        });
-        
-        update();
+        function renderAnalysisCharts() {
+            const idx = document.getElementById('monthSelector').value;
+            const d = rawData[idx];
+            
+            // 1. Gráfico de Custos (Psicologia: Vermelho/Laranja)
+            const ctxG = document.getElementById('chartGastos').getContext('2d');
+            if (gastosChart) gastosChart.destroy();
+            
+            const totalMoto = d.parcM + d.fuel + d.insurance + d.maint;
+
+            gastosChart = new Chart(ctxG, {
+                type: 'pie',
+                data: {
+                    labels: ['Fixo', 'Pessoal', 'Moto (Operação)', 'Entrada/Lance'],
+                    datasets: [{
+                        data: [d.fix, d.personal, totalMoto, d.down],
+                        backgroundColor: ['#eab308', '#94a3b8', '#f97316', '#ef4444'],
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 9, weight: 'bold' } } } } }
+            });
+
+            // 2. Gráfico Renda vs Gasto (Verde vs Vermelho)
+            const ctxB = document.getElementById('chartRendaVsGasto').getContext('2d');
+            if (balanceChart) balanceChart.destroy();
+            
+            const totalRenda = d.sal + d.extra;
+            const totalGasto = d.fix + d.personal + totalMoto + d.down;
+            const sobraPos = totalRenda - totalGasto;
+
+            balanceChart = new Chart(ctxB, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Salário (Base)', 'Extra (iFood/ML)', 'Total Despesas'],
+                    datasets: [{
+                        data: [d.sal, d.extra, totalGasto],
+                        backgroundColor: ['#065f46', '#10b981', '#ef4444'],
+                        cutout: '60%'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 9, weight: 'bold' } } } } }
+            });
+        }
+
+        applyGlobalInputs();
     </script>
 </body>
 </html>
