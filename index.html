@@ -1,297 +1,127 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factor 150 - Ultimate Strategic BI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        .input-cell { background: transparent; border: none; outline: none; width: 100%; text-align: center; font-variant-numeric: tabular-nums; font-size: 11px; padding: 6px; border-radius: 6px; transition: 0.2s; font-weight: 700; }
-        .input-cell:hover { background: #f1f5f9; }
-        .input-cell:focus { background: white; box-shadow: 0 0 0 2px #10b981; }
-        .panel-input { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.5rem; font-weight: 800; font-size: 0.875rem; width: 100%; outline: none; color: #1e293b; }
-        .panel-input:focus { border-color: #10b981; background: white; }
-    </style>
-</head>
-<body class="pb-12 px-4">
+import React, { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { TrendingDown, Calendar, DollarSign, Zap } from 'lucide-react';
 
-    <header class="max-w-7xl mx-auto py-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <div class="flex items-center gap-4">
-                <div class="bg-slate-900 p-3 rounded-2xl text-white shadow-xl">
-                    <i data-lucide="component" class="w-8 h-8"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-extrabold tracking-tighter italic uppercase">Factor 150 <span class="text-emerald-600">Strategic</span></h1>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Gestão Patrimonial e Fluxo de Caixa</p>
-                </div>
-            </div>
-            
-            <div class="glass-card p-5 grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-auto border-emerald-100 bg-emerald-50/30">
-                <div>
-                    <label class="text-[9px] font-black text-emerald-700 uppercase mb-1 block">Salário Base</label>
-                    <input type="number" id="inputSal" value="1622" class="panel-input" oninput="applyGlobalInputs()">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black text-emerald-500 uppercase mb-1 block">Meta iFood</label>
-                    <input type="number" id="inputIfood" value="1050" class="panel-input" oninput="applyGlobalInputs()">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black text-blue-500 uppercase mb-1 block">Meta M.Livre</label>
-                    <input type="number" id="inputML" value="640" class="panel-input" oninput="applyGlobalInputs()">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black text-slate-500 uppercase mb-1 block">Reserva XP</label>
-                    <input type="number" id="inputReserva" value="8200" class="panel-input text-emerald-600" oninput="update()">
-                </div>
-            </div>
+const App = () => {
+  const [extraAmortization, setExtraAmortization] = useState(750);
+  const [initialBalance] = useState(15000); // Valor estimado baseado na parcela de 518
+  const [interestRate] = useState(0.019); // Estimativa de 1.9% a.m.
+  const [monthlyPayment] = useState(518.20);
+
+  const calculateData = (extra) => {
+    let balance = initialBalance;
+    let data = [{ month: 0, balance: initialBalance, interestSaved: 0 }];
+    let totalInterestPaid = 0;
+    let month = 0;
+
+    while (balance > 0 && month < 60) {
+      month++;
+      const interest = balance * interestRate;
+      const principalFromPayment = monthlyPayment - interest;
+      
+      // Amortização total = principal da parcela + extra
+      const totalAmortization = principalFromPayment + extra;
+      
+      balance = Math.max(0, balance - totalAmortization);
+      totalInterestPaid += interest;
+
+      data.push({
+        month,
+        balance: Math.round(balance),
+        extra: extra
+      });
+    }
+    return data;
+  };
+
+  const data500 = calculateData(500);
+  const data1000 = calculateData(1000);
+  const dataNormal = calculateData(0);
+
+  const months500 = data500.length - 1;
+  const months1000 = data1000.length - 1;
+  const monthsNormal = dataNormal.length - 1;
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-indigo-600 p-6 text-white">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Zap className="fill-current" /> Simulador de Amortização (CC - Barbacena)
+          </h1>
+          <p className="opacity-90">Comparando o impacto de R$ 500 a R$ 1.000 extras por mês.</p>
         </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto space-y-8">
-        
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass-card p-6 border-l-8 border-emerald-600">
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Patrimônio Previsto (15 meses)</span>
-                <div id="kpiFinal" class="text-3xl font-black text-slate-900">R$ 0</div>
+        <div className="p-6">
+          <div className="mb-8 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+            <label className="block text-sm font-semibold text-indigo-900 mb-2">
+              Ajuste o valor extra para simulação rápida: R$ {extraAmortization}
+            </label>
+            <input 
+              type="range" 
+              min="500" 
+              max="1000" 
+              step="50"
+              value={extraAmortization}
+              onChange={(e) => setExtraAmortization(parseInt(e.target.value))}
+              className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
+            <div className="p-4 bg-slate-100 rounded-lg border border-slate-200">
+              <span className="text-xs uppercase font-bold text-slate-500">Sem Extra</span>
+              <div className="text-2xl font-bold text-slate-700">{monthsNormal} meses</div>
             </div>
-            <div class="glass-card p-6 border-l-8 border-red-600">
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Ponto Crítico de Reserva</span>
-                <div id="kpiPiso" class="text-3xl font-black text-red-600">R$ 0</div>
+            <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
+              <span className="text-xs uppercase font-bold text-blue-600">Com R$ 500 extra</span>
+              <div className="text-2xl font-bold text-blue-700">{months500} meses</div>
             </div>
-            <div class="glass-card p-6 bg-slate-900 text-white">
-                <span class="text-[10px] font-bold text-slate-400 uppercase mb-2 block">Modo de Operação</span>
-                <select id="extraStatus" class="w-full bg-slate-800 border-none text-xs font-bold p-3 rounded-xl outline-none" onchange="applyGlobalInputs()">
-                    <option value="both" selected>Full (iFood + M.Livre)</option>
-                    <option value="ifood">Foco iFood</option>
-                    <option value="ml">Foco M.Livre</option>
-                    <option value="none">Apenas CLT</option>
-                </select>
+            <div className="p-4 bg-emerald-100 rounded-lg border border-emerald-200">
+              <span className="text-xs uppercase font-bold text-emerald-600">Com R$ 1000 extra</span>
+              <div className="text-2xl font-bold text-emerald-700">{months1000} meses</div>
             </div>
-        </section>
+          </div>
 
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="glass-card p-8 lg:col-span-2">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <i data-lucide="area-chart" class="w-4 h-4 text-emerald-600"></i> Performance de Acúmulo
-                </h3>
-                <div class="h-[350px]"><canvas id="chartPrincipal"></canvas></div>
+          <div className="h-64 md:h-80 w-full mb-6">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={dataNormal}>
+                <defs>
+                  <linearGradient id="colorNormal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" label={{ value: 'Meses', position: 'insideBottomRight', offset: -5 }} />
+                <YAxis label={{ value: 'Saldo (R$)', angle: -90, position: 'insideLeft' }} />
+                <Tooltip formatter={(value) => `R$ ${value}`} labelFormatter={(m) => `Mês ${m}`} />
+                <Legend />
+                <Area type="monotone" dataKey="balance" stroke="#94a3b8" name="Plano Original" fillOpacity={1} fill="url(#colorNormal)" strokeWidth={2} />
+                <Area type="monotone" data={data500} dataKey="balance" stroke="#3b82f6" name="Extra R$ 500" fill="transparent" strokeWidth={3} />
+                <Area type="monotone" data={data1000} dataKey="balance" stroke="#10b981" name="Extra R$ 1000" fill="transparent" strokeWidth={4} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+            <div className="flex items-start gap-3">
+              <TrendingDown className="text-amber-600 mt-1" />
+              <div>
+                <h3 className="font-bold text-amber-900">Análise de Coerência</h3>
+                <p className="text-sm text-amber-800 leading-relaxed">
+                  Amortizando **R$ 500**, você já reduz o tempo da dívida em mais de 50%. <br/>
+                  Amortizando **R$ 1.000**, você entra no modo "turbo": a dívida é liquidada em cerca de 1/4 do tempo original. 
+                  Como você estuda computação, pense nisso como reduzir a complexidade temporal de O(n) para algo muito próximo de O(1) em termos de impacto na sua vida.
+                </p>
+              </div>
             </div>
-            
-            <div class="glass-card p-8 bg-slate-50/50">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Análise Mensal Detalhada</h3>
-                <select id="monthSelector" class="w-full bg-white border border-slate-200 p-3 rounded-xl text-xs font-bold outline-none mb-6 shadow-sm" onchange="renderAnalysisCharts()">
-                </select>
-                
-                <div class="space-y-8">
-                    <div>
-                        <span class="text-[9px] font-bold text-slate-400 uppercase block text-center mb-2 italic">Composição de Gastos (Psicologia Visual)</span>
-                        <div class="h-[200px]"><canvas id="chartGastos"></canvas></div>
-                    </div>
-                    <div class="border-t border-slate-200 pt-6">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase block text-center mb-2 italic">Equilíbrio Renda vs. Despesa</span>
-                        <div class="h-[200px]"><canvas id="chartRendaVsGasto"></canvas></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+          </div>
+        </div>
+      </div>
+      <p className="text-center text-slate-400 text-xs mt-6">Simulação baseada em juros compostos médios de mercado para este valor de parcela.</p>
+    </div>
+  );
+};
 
-        <section class="glass-card overflow-hidden">
-            <div class="p-6 bg-white border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest italic flex items-center gap-2">
-                    <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i> Memória de Cálculo Operacional
-                </h3>
-                <div class="flex gap-2">
-                    <button onclick="applyFinance(380, 4500)" class="bg-emerald-600 text-white text-[10px] font-black px-4 py-2 rounded-lg hover:bg-emerald-700 transition shadow-lg shadow-emerald-100">CONSÓRCIO (380/4500)</button>
-                    <button onclick="applyFinance(590, 5000)" class="bg-blue-600 text-white text-[10px] font-black px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100">CARTÃO (590/5000)</button>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-[11px] border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-400 uppercase font-black border-b text-[9px] text-center">
-                            <th class="px-6 py-5 text-left text-slate-800 border-r">Período</th>
-                            <th class="text-emerald-800">Salário</th>
-                            <th class="text-emerald-500">Extra</th>
-                            <th class="text-amber-600">Fixo</th>
-                            <th class="text-amber-500">G. Pessoal</th>
-                            <th class="text-orange-600">Parcela</th>
-                            <th class="text-orange-500">Gasolina</th>
-                            <th class="text-orange-400">Seguro</th>
-                            <th class="text-orange-400">Manut.</th>
-                            <th class="bg-red-50 text-red-600">Entrada</th>
-                            <th class="bg-emerald-600 text-white">Sobra</th>
-                            <th class="bg-slate-900 text-white text-right px-6">Saldo XP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        const months = ['Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26', 'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27'];
-        
-        let rawData = months.map((m, i) => {
-            let base = { m, sal: 1622, extra: 1690, personal: 150, parcM: 590, fuel: 240, insurance: 80, maint: 70, down: 0 };
-            const fixos = [1612, 1061.18, 816.59, 789.79, 789.79, 789.79, 669.52, 669.52, 621.57, 577.40, 549.35, 549.35, 549.35, 549.35, 549.35];
-            base.fix = fixos[i];
-            if(i === 0) { base.extra=0; base.parcM=0; base.fuel=0; base.insurance=0; base.maint=0; base.personal=0; }
-            if(i === 1) { base.extra=0; base.parcM=0; base.fuel=0; base.insurance=0; base.maint=0; }
-            if(i === 2) { base.down = 5000; }
-            return base;
-        });
-
-        let mainChart, gastosChart, balanceChart;
-
-        const selector = document.getElementById('monthSelector');
-        months.forEach((m, i) => {
-            const opt = document.createElement('option');
-            opt.value = i; opt.innerText = "Ver Análise de " + m;
-            if(i === 2) opt.selected = true;
-            selector.appendChild(opt);
-        });
-
-        function applyGlobalInputs() {
-            const sal = parseFloat(document.getElementById('inputSal').value) || 0;
-            const ifood = parseFloat(document.getElementById('inputIfood').value) || 0;
-            const ml = parseFloat(document.getElementById('inputML').value) || 0;
-            const status = document.getElementById('extraStatus').value;
-
-            rawData.forEach((d, i) => {
-                d.sal = sal;
-                if(i >= 2) {
-                    if(status === 'both') d.extra = ifood + ml;
-                    else if(status === 'ifood') d.extra = ifood;
-                    else if(status === 'ml') d.extra = ml;
-                    else d.extra = 0;
-                }
-            });
-            update();
-        }
-
-        function updateData(i, field, val) {
-            rawData[i][field] = parseFloat(val) || 0;
-            update();
-        }
-
-        function applyFinance(parc, down) {
-            rawData.forEach((d, i) => {
-                if(i >= 2) d.parcM = parc;
-                if(i === 2) d.down = down;
-            });
-            update();
-        }
-
-        function update() {
-            const initial = parseFloat(document.getElementById('inputReserva').value) || 0;
-            let current = initial;
-            let minS = initial, minM = months[0];
-            const hTotal = [], hSobras = [];
-            let html = "";
-
-            rawData.forEach((d, i) => {
-                const rec = d.sal + d.extra;
-                const gas = d.fix + d.personal + d.parcM + d.fuel + d.insurance + d.maint + d.down;
-                const sob = rec - gas;
-                current += sob;
-
-                if(current < minS) { minS = current; minM = d.m; }
-                hTotal.push(current);
-                hSobras.push(sob);
-
-                html += `<tr class="text-center font-semibold">
-                    <td class="px-6 py-4 font-bold bg-slate-50 border-r text-left text-slate-500">${d.m}</td>
-                    <td><input type="number" value="${d.sal}" class="input-cell" oninput="updateData(${i}, 'sal', this.value)"></td>
-                    <td class="text-emerald-600"><input type="number" value="${d.extra}" class="input-cell" oninput="updateData(${i}, 'extra', this.value)"></td>
-                    <td><input type="number" value="${d.fix}" class="input-cell" oninput="updateData(${i}, 'fix', this.value)"></td>
-                    <td><input type="number" value="${d.personal}" class="input-cell" oninput="updateData(${i}, 'personal', this.value)"></td>
-                    <td class="text-orange-600"><input type="number" value="${d.parcM}" class="input-cell" oninput="updateData(${i}, 'parcM', this.value)"></td>
-                    <td><input type="number" value="${d.fuel}" class="input-cell" oninput="updateData(${i}, 'fuel', this.value)"></td>
-                    <td><input type="number" value="${d.insurance}" class="input-cell" oninput="updateData(${i}, 'insurance', this.value)"></td>
-                    <td><input type="number" value="${d.maint}" class="input-cell" oninput="updateData(${i}, 'maint', this.value)"></td>
-                    <td class="bg-red-50 text-red-700 font-bold"><input type="number" value="${d.down}" class="input-cell" oninput="updateData(${i}, 'down', this.value)"></td>
-                    <td class="bg-emerald-600 text-white font-black px-4">R$ ${sob.toFixed(0)}</td>
-                    <td class="bg-slate-900 text-white font-black px-6 text-right">R$ ${current.toFixed(0)}</td>
-                </tr>`;
-            });
-
-            document.getElementById('tableBody').innerHTML = html;
-            document.getElementById('kpiFinal').innerText = "R$ " + current.toLocaleString('pt-BR');
-            document.getElementById('kpiPiso').innerText = "R$ " + minS.toLocaleString('pt-BR');
-            
-            renderMainChart(hTotal, hSobras);
-            renderAnalysisCharts();
-            lucide.createIcons();
-        }
-
-        function renderMainChart(total, sobras) {
-            const ctx = document.getElementById('chartPrincipal').getContext('2d');
-            if (mainChart) mainChart.destroy();
-            mainChart = new Chart(ctx, {
-                data: {
-                    labels: months,
-                    datasets: [
-                        { type: 'line', label: 'Saldo XP', data: total, borderColor: '#10b981', borderWidth: 5, tension: 0.4, fill: false, pointRadius: 5 },
-                        { type: 'bar', label: 'Sobra Líquida', data: sobras, backgroundColor: sobras.map(v => v < 0 ? '#ef4444' : '#10b981'), borderRadius: 6 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function renderAnalysisCharts() {
-            const idx = document.getElementById('monthSelector').value;
-            const d = rawData[idx];
-            
-            // 1. Gráfico de Custos (Psicologia: Vermelho/Laranja)
-            const ctxG = document.getElementById('chartGastos').getContext('2d');
-            if (gastosChart) gastosChart.destroy();
-            
-            const totalMoto = d.parcM + d.fuel + d.insurance + d.maint;
-
-            gastosChart = new Chart(ctxG, {
-                type: 'pie',
-                data: {
-                    labels: ['Fixo', 'Pessoal', 'Moto (Operação)', 'Entrada/Lance'],
-                    datasets: [{
-                        data: [d.fix, d.personal, totalMoto, d.down],
-                        backgroundColor: ['#eab308', '#94a3b8', '#f97316', '#ef4444'],
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 9, weight: 'bold' } } } } }
-            });
-
-            // 2. Gráfico Renda vs Gasto (Verde vs Vermelho)
-            const ctxB = document.getElementById('chartRendaVsGasto').getContext('2d');
-            if (balanceChart) balanceChart.destroy();
-            
-            const totalRenda = d.sal + d.extra;
-            const totalGasto = d.fix + d.personal + totalMoto + d.down;
-            const sobraPos = totalRenda - totalGasto;
-
-            balanceChart = new Chart(ctxB, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Salário (Base)', 'Extra (iFood/ML)', 'Total Despesas'],
-                    datasets: [{
-                        data: [d.sal, d.extra, totalGasto],
-                        backgroundColor: ['#065f46', '#10b981', '#ef4444'],
-                        cutout: '60%'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 9, weight: 'bold' } } } } }
-            });
-        }
-
-        applyGlobalInputs();
-    </script>
-</body>
-</html>
+export default App;
